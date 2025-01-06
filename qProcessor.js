@@ -48,7 +48,7 @@ log = Logger.createLogger({
 });
 
 const mongoose = require("mongoose");
-const mongoUrl = Number(process.env.MONGO_URL.length) > 0 ? process.env.MONGO_URL : 'mongodb://localhost/' + APP_NAME_SHORT;
+const mongoUrl = typeof process.env.MONGO_URL === 'String' ? process.env.MONGO_URL : 'mongodb://localhost/' + APP_NAME_SHORT;
 let client = () => {
 	return;
 }
@@ -108,7 +108,7 @@ async function processQueue() {
 	let qStart = Date.now();
 	let qDocs = 0;
 	
-	log.debug('processQueue(): mongoose.connection.readyState = ' + mongoose.connection.readyState);
+	if ( DEBUG ) log.debug('processQueue(): mongoose.connection.readyState = ' + mongoose.connection.readyState);
 	
 	myMessages = mongoose.model('messages', Message);
 	await myMessages.find( { state: 'ENQUEUED' } ).exec()
@@ -122,7 +122,7 @@ async function processQueue() {
 				return;
 			}
 			documents.forEach(document => {
-				log.debug("processQueue(): Attempting delivery of message ID: " + document.messageId);
+				if ( DEBUG ) log.debug("processQueue(): Attempting delivery of message ID: " + document.messageId);
 
 				// Skip this message if the document.state has changed
 				//  (i.e., no longer set to 'ENQUEUED'.
@@ -194,7 +194,7 @@ async function processQueue() {
 		// log.debug() that the processQueue() function is exiting as the absolute
 		//  last thing the processQueue() function does.
 		//
-		log.debug('processQueue(): Exiting...');
+		if ( DEBUG ) log.debug('processQueue(): Exiting...');
 	});	
 	
 
