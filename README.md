@@ -76,7 +76,28 @@ of MX weight.
 
 
 # Installation
-Installation instructions to follow...
+1. Download the source code for Mismo Messaging System from GitHub:
+
+> git clone https://github.com/tjeaster81/Mismo.git
+
+2. Run the `npm install` command:
+
+> (root@hostname) /root/src/Mismo# npm install
+
+3. Edit the $MISMO/.env environment file; change any variable definitions to match your environment.
+
+> (root@hostname) /root/src/Mismo# $EDITOR .env
+
+4. Decide whether the host in question is going to be an SMTP Engine or a qProcessor (or both!)
+For SMTP Engine:
+
+> (root@hostname) /root/src/Mismo/bin# $EDITOR localDomains.txt
+> (root@hostname) /root/src/Mismo/bin# node setLocalDomaims.js
+> (root@hostname) /root/src/Mismo# node smtp-engine.js
+
+For qProcessor:
+
+> (root@hostname) /root/src/Mismo# node qProcessor.js
 
 
 
