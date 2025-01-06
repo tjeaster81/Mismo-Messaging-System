@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "bunyan": "^1.8.15",
+    "bunyan-rotating-file-stream": "^2.0.6",
+    "date-and-time": "^3.6.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "get-fqdn": "^1.0.0",
+    "mailparser": "^3.7.2",
+    "mongodb": "^6.12.0",
+    "mongoose": "^8.9.2",
+    "smtp-server": "^3.13.6"
+  },
+  "name": "mismo",
+  "version": "0.0.2",
+  "description": "A MongoDB-backed SMTP/POP3 server that's meant to be clustered!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mongodb",
+    "smtp",
+    "pop3",
+    "express"
+  ],
+  "author": "TJ Easter <sixserpents@protonmail.com>",
+  "license": "GPL-2.0-only"
+}
