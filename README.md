@@ -44,7 +44,7 @@ load-balancer can query and use to make routing decisions.
 ### SMTP Engine
 Each of the SMTP Engine hosts will start the SMTP Engine as follows:
 
-> nodejs smtp-engine.js
+> node smtp-engine.js
 
 The SMTP Engine accepts SMTP connections from the global Internet, speaking just enough of the
 SMTP protocol to accept an inbound message and to store it in the MongoDB Cluster (in the
@@ -64,7 +64,7 @@ We also return a 421 Too Many Connections when the per-host limit is exceeded.
 ### qProcessor
 Each of the qProcessor hosts will start the qProcessor as follows:
 
-> nodejs qProcessor.js
+> node qProcessor.js
 
 The qProcessor queries MongoDB for any messages awaiting delivery (**document.state == 'ENQUEUED'**)
 and attempts to deliver them.  To do so, the qProcessor application fires off the
