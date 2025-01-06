@@ -24,9 +24,7 @@ cluster SMTP Engines and/or qProcessors.  Third, storing all of the messages in 
 us to create a simple, elegant webmail system for accessing/sending of messages.
 
 
-
-
-## load-balancer
+### load-balancer
 An optional front-end load-balancer to distribute inbound SMTP requests via custom logic.
 Should provide support for the round-robin, least-connections, least-messages, least-load-avg,
 and ipHash methods of load-balancing.
@@ -43,7 +41,7 @@ load-balancer can query and use to make routing decisions.
 
 
 
-## SMTP Engine
+### SMTP Engine
 Each of the SMTP Engine hosts will start the SMTP Engine as follows:
 
 > nodejs smtp-engine.js
@@ -61,7 +59,7 @@ specifies the maximum number of established connections we can have *per client 
 We also return a 421 Too Many Connections when the per-host limit is exceeded.
 
 
-## qProcessor
+### qProcessor
 Each of the qProcessor hosts will start the qProcessor as follows:
 
 > nodejs qProcessor.js
@@ -75,5 +73,11 @@ function at a configurable interval.  The default is 30 seconds.
 First, a call on DNS obtains the MX record for the receiver's domain.
 If multiple MX hosts are provided by DNS, a connection will be attempted to each in *ascending* order
 of MX weight.
+
+
+# Installation
+Installation instructions to follow...
+
+
 
 
