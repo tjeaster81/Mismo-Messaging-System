@@ -81,7 +81,7 @@ of MX weight.
 # Installation
 1. Download the source code for Mismo Messaging System from GitHub:
 
-> git clone https://github.com/tjeaster81/Mismo.git
+> git clone https://github.com/tjeaster81/Mismo-Messaging-System.git
 
 2. Run the `npm install` command:
 
