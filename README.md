@@ -51,9 +51,11 @@ SMTP protocol to accept an inbound message and to store it in the MongoDB Cluste
 'messages' collection with **document.state = 'ENQUEUED'**).
 
 The SMTP Engine can be configured for a maximum number of simultaneous connections by setting the
-> SMTP_MAX_CLIENTS and/or SMTP_MAX_CLIENTS_PER_HOST
+> SMTP_MAX_CLIENTS
+and/or
+> SMTP_MAX_CLIENTS_PER_HOST
 
-tunables in the $Mismo/.env file.  SMTP_MAX_CLIENTS specifies the maximum number of established
+tunables in the $MISMO/.env file.  SMTP_MAX_CLIENTS specifies the maximum number of established
 connections that we permit; we return a 421 Too Many Connections if exceeded.  SMTP_MAX_CLIENTS_PER_HOST
 specifies the maximum number of established connections we can have *per client IP address.*
 We also return a 421 Too Many Connections when the per-host limit is exceeded.
@@ -68,7 +70,8 @@ The qProcessor queries MongoDB for any messages awaiting delivery (**document.st
 and attempts to deliver them.  To do so, the qProcessor application fires off the
 > qProcessor.processQueue()
 
-function at a configurable interval.  The default is 30 seconds.
+function at a configurable interval.  See the QUEUE_CYCLE_PERIOD in the $MISMO/.env file.
+The default is 30 seconds.
 
 First, a call on DNS obtains the MX record for the receiver's domain.
 If multiple MX hosts are provided by DNS, a connection will be attempted to each in *ascending* order
@@ -89,10 +92,13 @@ of MX weight.
 > (root@hostname) /root/src/Mismo# $EDITOR .env
 
 4. Decide whether the host in question is going to be an SMTP Engine or a qProcessor (or both!)
+
 For SMTP Engine:
 
 > (root@hostname) /root/src/Mismo/bin# $EDITOR localDomains.txt
+> 
 > (root@hostname) /root/src/Mismo/bin# node setLocalDomaims.js
+> 
 > (root@hostname) /root/src/Mismo# node smtp-engine.js
 
 For qProcessor:
