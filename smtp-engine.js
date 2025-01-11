@@ -259,7 +259,7 @@ const SMTPServer = require("smtp-server").SMTPServer;
 const SMTPServiceOptions = {
 	logger: log,
 	name: APP_NAME_SHORT,
-	banner: '[' + fqdn + '] ' + APP_NAME_FULL + ' v' + 
+	banner: '[' + os.hostname() + '] ' + APP_NAME_FULL + ' v' + 
 		APP_VERSION + ' online at ' + date.format(new Date, 'MM/DD/YYYY HH:mm:ss') + '.',
 	size: (process.env.SMTP_MAX_MESSAGE_SIZE * (1024 * 1024)),
 	authMethods: [ 'PLAIN', 'LOGIN', 'CRAM-MD5' ],
@@ -410,7 +410,7 @@ const SMTPServiceOptionsSSL = {
 	key: fs.readFileSync(process.env.SMTP_TLS_KEY),
 	logger: log,
 	name: APP_NAME_SHORT,
-	banner: '[' + fqdn + '] ' + APP_NAME_FULL + ' v' + 
+	banner: '[' + os.hostname() + '] ' + APP_NAME_FULL + ' v' + 
 		APP_VERSION + ' online at ' + date.format(new Date, 'MM/DD/YYYY HH:mm:ss') + '.',
 	size: (process.env.SMTP_MAX_MESSAGE_SIZE * (1024 * 1024)),
 	authMethods: [ 'PLAIN', 'LOGIN' ],
