@@ -1,5 +1,5 @@
 /*
- * smtp-engine.js
+ * qProcessor.js
  * TJ Easter <sixserpents@protonmail.com>
  * 20250105
  * 20250106
@@ -131,14 +131,35 @@ async function processQueue() {
 					return;
 				}
 
+	//
+	// There's gotta be messages in the queue, durrr.
+	// 
+	console.log(document);
+
+
+
+				// Start the DNS lookup as early as possible
+				let SMTPHosts = {};
+				[ user, domain ] = document.to.trim().toLowerCase().split('@');
+				dns.resolveMx(domain,
+					(err, addresses) => {
+						if (err) {
+							console.log('Error: ' + err.message);
+							log.error('Error obtaining MX record(s) for ' + domain + ': ' + err.message);
+						}
+						console.log(domain + ': mx records: %j', addresses)
+						SMTPHosts[addresses.priority] = addresses.exchange;
+					}
+				);
+
 				// Announce ourselves...
-				document.headers = 'X-Mismo-Log: Attempting to deliver message ID: ' + 
+				document.headers = 'X-Mismo-Log: Attempting to deliver message ID ' + 
 							document.messageId + ' at ' + date.format(Date.now(), 'MM/DD/YYYY HH:mm:ss') +
 							'\n' + document.headers;
 
 				// TODO:
-				// (a) Obtain/validate the destination domain name from RCPT TO
-				// (b) Obtain MX records for destination domain
+				// (/) Obtain/validate the destination domain name from RCPT TO
+				// (/) Obtain MX records for destination domain
 				// (c) Attempt to deliver Message to destination via SMTP
 				//     (a) If successful, set document.state = 'DELETED'
 				//     (b) If unsuccessful, update document.lastDeliveryAttempt = Date.now()
@@ -152,9 +173,18 @@ async function processQueue() {
 				document.lastDeliveryAttempt = Date.now();
 				document.save();
 
-				[ user, domain ] = document.to.trim().toLowerCase().split('@');
-
 				console.log(document.messageId + ': domain = ' + domain + ', user = ' + user);
+
+				// Iterate through SMTPHosts by ascending priority
+				SMTPHosts.keys().sort().forEach( (key) => {
+					// This is where nodemailer comes in; we can use it to create the SMTP session
+					//  with the MX hosts.
+
+
+
+
+				}
+
 
 
 
