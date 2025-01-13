@@ -5,6 +5,7 @@
  * 20241230
  * 20250101
  * 20250105
+ * 20250113
  */
 
 global.DEBUG = false
@@ -33,8 +34,10 @@ const date = require('date-and-time');
 // Functionality that returns the fully-qualified domain name
 // of the host that we're running on.
 const getFQDN = require('get-fqdn');
-getFQDN().then(fqdn => {
-	console.log('Fully qualified domain name: ' + fqdn);
+global.fqdn = null;
+getFQDN().then(domainName => {
+	console.log('Fully qualified domain name: ' + domainName);
+	fqdn = domainName.toLowerCase();
 });
 
 // Global state variable;
@@ -78,9 +81,6 @@ log = Logger.createLogger({
 // The Mongoose module:
 const mongoose = require('mongoose');
 const mongoUrl = Number(process.env.MONGO_URL.length) > 0 ? process.env.MONGO_URL : 'mongodb://localhost/' + APP_NAME_SHORT;
-let client = () => {
-    return;
-}
 mongoose.connect(mongoUrl).then((ans) => {
 	console.log("Mongoose connected successfully to " + mongoUrl)
 	log.info("Successfully connected to Mongoose.");
@@ -96,31 +96,26 @@ mongoose.connect(mongoUrl).then((ans) => {
 // TODO:
 // Query MongoDB to obtain various server variables and
 //  statistics and log the data.
-try {
-	db = client.db(APP_NAME_SHORT);
-	mongoStatus = db.command( {serverStatus: 1} );
-} catch(error) {
-	if ( error instanceof MongoExpiredSessionError ) {
-		client = new MongoClient(process.env.MONGO_URL || 'mongodb://localhost/' + APP_NAME_SHORT);
-		db = client.db(APP_NAME_SHORT);
-		mongoStatus = db.command( {serverStatus:1} );
-	} else {
-		console.log(error);
-		log.critical(error);
-	}
-}
-
-db = client.db(APP_NAME_SHORT);
-messagesColl = db.collection('messages');
 
 
-myCursor = messagesColl.find( { status: 'DELIVERED' } );
-count = messagesColl.countDocuments( { status: 'DELIVERED' } );
-console.log(count + ' messages in DELIVERED state.');
-myCursor.forEach(doc => console.log(doc));
+// Load our Mongoose schemas
+DomainSchema = require('./Models/Domain');
+domains = mongoose.model('domains', DomainSchema);
+MailboxSchema = require('./Models/Mailbox');
+mailboxes = mongoose.model('mailboxes', MailboxSchema);
+MessageSchema = require('./Models/Message');
+messages = mongoose.model('messages', MessageSchema);
 
-value = messagesColl.valueOf();
-console.log('messagesColl: ' + value);
+
+//myCursor = messages.find( { status: 'DELIVERED' } );
+myCursor = messages.find( { } ).exec()
+	.then(docs => {
+		console.log('Found ' + docs.length + ' messages in MongoDB.');
+		//console.log(docs);
+	});
+//console.log(myCursor);
+//myCursor.forEach(doc => console.log(doc));
+
 
 
 
@@ -259,7 +254,7 @@ const SMTPServer = require("smtp-server").SMTPServer;
 const SMTPServiceOptions = {
 	logger: log,
 	name: APP_NAME_SHORT,
-	banner: '[' + os.hostname() + '] ' + APP_NAME_FULL + ' v' + 
+	banner: '[' + fqdn + '] ' + APP_NAME_FULL + ' v' + 
 		APP_VERSION + ' online at ' + date.format(new Date, 'MM/DD/YYYY HH:mm:ss') + '.',
 	size: (process.env.SMTP_MAX_MESSAGE_SIZE * (1024 * 1024)),
 	authMethods: [ 'PLAIN', 'LOGIN', 'CRAM-MD5' ],
@@ -333,11 +328,12 @@ const SMTPServiceOptions = {
 
 		// FIXME:
 		// The db object is not defined here.  WTF?
-		collection = db.collection('Domains');
-		myCursor = collection.find({domain: domain});
-		myCursor.forEach( (doc) => {
-			console.log(doc.domain);
-		});
+		//collection = db.collection('Domains');
+		myCursor = domains.find({domain: domain});
+		console.log('onMailFrom(): myCursor: ' + myCursor);
+		//myCursor.forEach( (doc) => {
+		//	console.log(doc.domain);
+		//});
 		//console.log(myCursor.countDocuments({domain: domain}));
 
 		return callback();
@@ -365,7 +361,7 @@ const SMTPServiceOptions = {
 		console.log(emailData);
 			simpleParser(emailData)
 				.then(parsed => {
-					parsed.messageId = crypto.createHash('sha1').update(emailData + Date.now()).digest('hex') + '@' + os.hostname();
+					parsed.messageId = crypto.createHash('sha1').update(emailData + Date.now()).digest('hex').substr(0,32) + '@' + fqdn;
 					console.log(session.remoteAddress + ' submitted message ID: ' +
 						parsed.messageId + '; ' + emailData.length + ' bytes transmitted.');
 					log.info(session.remoteAddress + ' submitted message ID: ' +
@@ -398,7 +394,7 @@ const SMTPServiceOptions = {
 				.catch(err => {
 					handleError(err);
 					err = new Error('Could not parse email message.');
-					err.responseCode(501);
+					err.responseCode = 501;
 					return callback(err);
 				});
 		});
@@ -410,7 +406,7 @@ const SMTPServiceOptionsSSL = {
 	key: fs.readFileSync(process.env.SMTP_TLS_KEY),
 	logger: log,
 	name: APP_NAME_SHORT,
-	banner: '[' + os.hostname() + '] ' + APP_NAME_FULL + ' v' + 
+	banner: '[' + fqdn + '] ' + APP_NAME_FULL + ' v' + 
 		APP_VERSION + ' online at ' + date.format(new Date, 'MM/DD/YYYY HH:mm:ss') + '.',
 	size: (process.env.SMTP_MAX_MESSAGE_SIZE * (1024 * 1024)),
 	authMethods: [ 'PLAIN', 'LOGIN' ],
@@ -468,6 +464,7 @@ const SMTPServiceOptionsSSL = {
 
 			callback(null, 'Message ID: ' + session.messageId +
 					' accepted at ' + date.format(new Date, 'MM/DD/YYYY HH:mm:ss'));
+			});
 		});
 
 	}
