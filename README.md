@@ -1,12 +1,17 @@
 # Mismo Messaging System
-The Mismo Messaging System is a complete Email hosting package, written for NodeJS, that comprises
-six components: 
-- the SMTP Engine, supporting SMTP AUTH (auth before relay), which accepts inbound SMTP connections, placing the parsed message (and it's attachments) into MongoDB for delivery or further processing,
-- the qProcessor, which obtains the MX records for remote-destined messages and attempts to deliver the queued messages to their ultimate destination, 
-- the mailstore, a MongoDB database where messages and configuration are stored,
-- the Mismo Admin Console for managing commercially-hosted Mismo instances (add domain, DNS verify domain, enable/disable per domain, enable/disable per mailbox, reset passwords, regenerate OpenPGP keys, view per-mailbox disk usage, etc.),
-- the custom profile editor/webmail client for managing your profile and sending/receiving messages, -and-
-- a TLS-secured POP3 server for accessing your messages via your favorite mail user agent (MUA).  The POP3 service, combined with the SMTP Engine's auth-before-relay, allows you to use any MUA you'd like with Mismo (Thunderbird, Evolution, KMail, Microsoft Outlook, Google Mail, etc.)
+The Mismo Messaging System is a complete Email hosting package, written for NodeJS, that comprises six components: 
+
+> the SMTP Engine, supporting SMTP AUTH (auth before relay), which accepts inbound SMTP connections, placing the parsed message (and it's attachments) into MongoDB for delivery or further processing,
+
+> the qProcessor, which obtains the MX records for remote-destined messages and attempts to deliver the queued messages to their ultimate destination,
+
+> the mailstore, a MongoDB database where messages and configuration are stored,
+
+> the Mismo Admin Console for managing commercially-hosted Mismo instances (add domain, DNS verify domain, enable/disable per domain, enable/disable per mailbox, reset passwords, regenerate OpenPGP keys, view per-mailbox disk usage, etc.),
+
+> the custom profile editor/webmail client for managing your profile and sending/receiving messages, -and-
+
+> a TLS-secured POP3 server for accessing your messages via your favorite mail user agent (MUA).  The POP3 service, combined with the SMTP Engine's auth-before-relay, allows you to use any MUA you'd like with Mismo (Thunderbird, Evolution, KMail, Microsoft Outlook, Google Mail, etc.)
 
 # Architecture
 The *Mismo Messaging System* is designed to be *fast!*  Code supporting functionality that we
@@ -102,6 +107,19 @@ For SMTP Engine:
 
 For qProcessor:
 
+Install BIND9:
+> (root@hostname) /root/src/Mismo# apt-get update && apt-get install bind9
+
+Delete the configuration that came with the BIND9 package:
+> (root@hostname) /root/src/Mismo# rm -rf /etc/bind/*
+
+Copy the Mismo-provided named.conf(5) file to /etc/bind:
+> (root@hostname) /root/src/Mismo# cp extra/bind9/named.conf /etc/bind/
+
+Start the caching-only instance of BIND9:
+> (root@hostname) /root/src/Mismo# service bind9 restart
+
+Start the qProcessor:
 > (root@hostname) /root/src/Mismo# node qProcessor.js
 
 
