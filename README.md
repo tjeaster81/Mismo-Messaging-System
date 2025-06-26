@@ -1,13 +1,12 @@
 # Mismo Messaging System
 The Mismo Messaging System is a complete Email hosting package, written for NodeJS, that comprises
-three modules: 
-- the SMTP Engine, which accepts inbound SMTP connections
-- the qProcessor, which attempts to deliver queued messages, -and-
-- the front-end load-balancer (optional).
-
-Additionally, a webmail client, will be developed to access emails stored in the
-Mismo Messaging System (i.e., via MongoDB ODM instead of POP3/IMAP).  The only requirement of the
-webmail application is that it be written in PHP.
+six components: 
+- the SMTP Engine, supporting SMTP AUTH (auth before relay), which accepts inbound SMTP connections, placing the parsed message (and it's attachments) into MongoDB for delivery or further processing,
+- the qProcessor, which obtains the MX records for remote-destined messages and attempts to deliver the queued messages to their ultimate destination, 
+- the mailstore, a MongoDB database where messages and configuration are stored,
+- the Mismo Admin Console for managing commercially-hosted Mismo instances (add domain, DNS verify domain, enable/disable per domain, enable/disable per mailbox, reset passwords, regenerate OpenPGP keys, view per-mailbox disk usage, etc.),
+- the custom profile editor/webmail client for managing your profile and sending/receiving messages, -and-
+- a TLS-secured POP3 server for accessing your messages via your favorite mail user agent (MUA).  The POP3 service, combined with the SMTP Engine's auth-before-relay, allows you to use any MUA you'd like with Mismo (Thunderbird, Evolution, KMail, Microsoft Outlook, Google Mail, etc.)
 
 # Architecture
 The *Mismo Messaging System* is designed to be *fast!*  Code supporting functionality that we
@@ -23,11 +22,6 @@ everything in the database (messages, list of domains, mailboxes, users, etc.), 
 cluster SMTP Engines and/or qProcessors.  Third, storing all of the messages in MongoDB allows
 us to create a simple, elegant webmail system for accessing/sending of messages.
 
-
-### load-balancer
-An optional front-end load-balancer to distribute inbound SMTP requests via custom logic.
-Should provide support for the round-robin, least-connections, least-messages, least-load-avg,
-and ipHash methods of load-balancing.
 
 **TODO:**
 Figure out how to store the pool configurations (yaml, js, xml, etc?) for start-up.
@@ -74,8 +68,9 @@ function at a configurable interval.  See the QUEUE_CYCLE_PERIOD in the $MISMO/.
 The default is 30 seconds.
 
 First, a call on DNS obtains the MX record for the receiver's domain.
-If multiple MX hosts are provided by DNS, a connection will be attempted to each in *ascending* order
-of MX weight.
+If multiple MX hosts are provided by DNS, a connection will be attempted to each in *ascending* order of MX weight.
+
+*Note*:  to save on network bandwidth, and to maximize the performance benefits, we run a caching-only instance of BIND9 on each qProcessor host.  Using the BIND9 configuration provided in the Mismo repository, the service will listen only on the loopback interface (127.0.0.1), accept queries only from 127.0.0.0/8, and cache up to 4 GB of DNS responses.  This is one of the reasons that we recommend more robust hardware for the qProcessors over the SMTP Engines.
 
 
 # Installation
@@ -91,7 +86,11 @@ of MX weight.
 
 > (root@hostname) /root/src/Mismo# $EDITOR .env
 
-4. Decide whether the host in question is going to be an SMTP Engine or a qProcessor (or both!)
+4. Edit the $MISMO/Config.js file; change any values to match your environment.
+
+> (root@hostname) /root/src/Mismo# $EDITOR/Config.js
+
+5. Decide whether the host in question is going to be an SMTP Engine or a qProcessor (or both!)
 
 For SMTP Engine:
 
